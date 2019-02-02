@@ -133,6 +133,8 @@ def listen_print_loop(responses):
             print(transcript + overwrite_chars)
             # Translates some text into Russian
             translation = translate_client.translate(transcript + overwrite_chars, target_language=target)
+            with open("Output.txt", "a") as text_file:
+                text_file.write(translation['translatedText']+'\n')
             print(u'Translation: {}'.format(translation['translatedText']))
 
             # Exit recognition if any of the transcribed phrases could be
