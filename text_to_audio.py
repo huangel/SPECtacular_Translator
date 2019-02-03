@@ -3,7 +3,7 @@ import wave
 
 
 def synthesize_text(text):
-    """Synthesizes speech from the input string of text. hihi"""
+    """Synthesizes speech from the input string of text."""
     from google.cloud import texttospeech
     client = texttospeech.TextToSpeechClient()
 

@@ -3,7 +3,7 @@ from __future__ import division
 import re
 import sys
 import json
-
+from firebase import firebase
 from google.cloud import speech
 from google.cloud.speech import enums
 from google.cloud.speech import types
@@ -15,9 +15,9 @@ from google.cloud import translate
 translate_client = translate.Client()
 
 target = 'ko'
-out = {"lang":target}
+out = {"lang": target}
 
-
+firebase = firebase.FirebaseApplication('https://translation-bf31b.firebaseio.com', None)
 
 # Audio recording parameters
 RATE = 16000
@@ -136,9 +136,20 @@ def listen_print_loop(responses):
             print(transcript + overwrite_chars)
             # Translates some text into Russian
             translation = translate_client.translate(transcript + overwrite_chars, target_language=target)
-            with open("output.json", "a") as text_file:
-                out[str(count)] = translation['translatedText']
-                count+=1
+            
+
+            # with open('output.json') as f:
+            #     cur_dic = json.load(f)
+
+            result = firebase.patch('/output', {str(count):translation['translatedText']})
+            count+=1
+            print(result)
+
+
+            # with open("output.json", "a") as text_file:
+            #     out[str(count)] = translation['translatedText']
+            #     count+=1
+
             print(u'Translation: {}'.format(translation['translatedText']))
 
             # Exit recognition if any of the transcribed phrases could be
