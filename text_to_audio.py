@@ -1,5 +1,7 @@
 import pyaudio
 import wave
+from firebase import firebase
+import json
 
 
 def synthesize_text(text):
@@ -45,6 +47,29 @@ def synthesize_text(text):
     # close PyAudio (5)
     p.terminate()
 
+def get_text(count = 0):
+    firebase = firebase.FirebaseApplication('https://translation-bf31b.firebaseio.com', None)
+
+    result = firebase.get('/output', count)
+
+    for cur_count in range(100):
+        result = firebase.get('/output', cur_count)
+        if result != None:
+            yield result 
+        else:
+            break
+
+
+
+    # while result != None:
+    #     result = firebase.get('/output', count)
+    #     count += 1
+    #     yield result
+
+    # result = firebase.get('/output', count)
+    # return result
+
 
 if __name__ == '__main__':
-    synthesize_text('hello')
+    for i in get_text():
+        synthesize_text(i)
