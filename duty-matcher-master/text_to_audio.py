@@ -7,8 +7,10 @@ import json
 import sys
 
 firebase = firebase.FirebaseApplication('https://translation-bf31b.firebaseio.com', None)
-lang = sys.argv[2]
-other_username = str(sys.argv[3])
+# lang = sys.argv[2]
+# other_username = str(sys.argv[3])
+# global lang
+lang = ""
 
 def synthesize_text(text):
     """Synthesizes speech from the input string of text."""
@@ -49,6 +51,7 @@ def synthesize_text(text):
     stream.close()
     # close PyAudio (5)
     p.terminate()
+    # return response.audio_content
 
 translate_client = translate.Client()
 
@@ -66,7 +69,6 @@ def translate_to_brailles(text):
     return translation.lower().translate(transtab)
 
 db = firestore.Client()
-query_ref = db.collection(u'translation').document(other_username)
 
 def on_snapshot(query_snapshot, b, c):
     for doc in query_snapshot:
@@ -76,17 +78,22 @@ def on_snapshot(query_snapshot, b, c):
             cur_indices.remove('lang')
             max_index = max(cur_indices)
             #if output lang is braille
-            if sys.argv[4] == "braille":
+            if lang == "braille":
                 a = translate_to_brailles(doc.to_dict()[max_index])
                 print(a)
             else:
-                synthesize_text(doc.to_dict()[max_index])
+                a = synthesize_text(doc.to_dict()[max_index])
         except:
             pass
             
-def main():
+def main(my_username, my_lang, other_username, other_lang):
+    query_ref = db.collection(u'translation').document(other_username)
+    global lang
+    lang = my_lang
     query_watch = query_ref.on_snapshot(on_snapshot)
-    input()
+    # my_dict = {el.id: el.to_dict() for el in doc}
+    return
+    # input()
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
