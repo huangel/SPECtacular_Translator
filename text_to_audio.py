@@ -1,10 +1,13 @@
 import pyaudio
 import wave
 from firebase import firebase
+from google.cloud import firestore
 import json
+import sys
 
 firebase = firebase.FirebaseApplication('https://translation-bf31b.firebaseio.com', None)
-lang = firebase.get("/output","lang")
+lang = sys.argv[2]
+other_username = str(sys.argv[3])
 
 def synthesize_text(text):
     """Synthesizes speech from the input string of text."""
@@ -49,42 +52,48 @@ def synthesize_text(text):
     # close PyAudio (5)
     p.terminate()
 
-def get_text(count = 0):
-    print(firebase.get('/output', None))
-    result = firebase.get('/output', None).keys()
-    dic_keys = set()
-    for key in result:
-        try:
-            dic_keys.add(int(key))
-        except:
-            pass
-    min_key = min(dic_keys)
-    result = firebase.get('/output', min_key)
-    firebase.delete('/output', min_key)
+db = firestore.Client()
+query_ref = db.collection(u'translation')
 
-    while True:
-        yield result
-        result = firebase.get('/output', None).keys()
-        dic_keys = set()
-        for key in result:
+def on_snapshot(query_snapshot, b, c):
+    for doc in query_snapshot:
+        if doc.id == other_username:
+            cur_indices = set(doc.to_dict().keys())
             try:
-                dic_keys.add(int(key))
+                cur_indices.remove('lang')
+                max_index = max(cur_indices)
+                synthesize_text(doc.to_dict()[max_index])
+                print(doc.to_dict()[max_index]) 
             except:
                 pass
-        min_key = min(dic_keys)
-        result = firebase.get('/output', min_key)
-        firebase.delete('/output', min_key)
 
+# def get_text(count = 0):
+    # print(firebase.get('/output', None))
+    # result = firebase.get('/output', None).keys()
+    # dic_keys = set()
+    # for key in result:
+    #     try:
+    #         dic_keys.add(int(key))
+    #     except:
+    #         pass
+    # min_key = min(dic_keys)
+    # result = firebase.get('/output', min_key)
+    # firebase.delete('/output', min_key)
 
-    # while result != None:
-    #     result = firebase.get('/output', count)
-    #     count += 1
+    # while True:
     #     yield result
-
-    # result = firebase.get('/output', count)
-    # return result
+    #     result = firebase.get('/output', None).keys()
+    #     dic_keys = set()
+    #     for key in result:
+    #         try:
+    #             dic_keys.add(int(key))
+    #         except:
+    #             pass
+    #     min_key = min(dic_keys)
+    #     result = firebase.get('/output', min_key)
+    #     firebase.delete('/output', min_key)
 
 
 if __name__ == '__main__':
-    for i in get_text():
-        synthesize_text(i)
+    query_watch = query_ref.on_snapshot(on_snapshot)
+    input()
