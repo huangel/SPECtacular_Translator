@@ -122,11 +122,6 @@ def listen_print_loop(responses):
         # Display the transcription of the top alternative.
         transcript = result.alternatives[0].transcript
 
-        # Display interim results, but with a carriage return at the end of the
-        # line, so subsequent lines will overwrite them.
-        #
-        # If the previous result was longer than this one, we need to print
-        # some extra spaces to overwrite the previous result
         overwrite_chars = ' ' * (num_chars_printed - len(transcript))
 
         if not result.is_final:
@@ -139,22 +134,12 @@ def listen_print_loop(responses):
             print(transcript + overwrite_chars)
             # Translates some text into Russian
             translation = translate_client.translate(transcript + overwrite_chars, target_language=target)
-            
 
-            # with open('output.json') as f:
-            #     cur_dic = json.load(f)
-
-            # result = firebase.patch('/output', {str(count):translation['translatedText']})
             doc_ref = db.collection(u'translation').document(sys.argv[1]) #TODO
             out[str(count)] = translation['translatedText']
             doc_ref.set(out)
             count+=1
             print(out)
-
-
-            # with open("output.json", "a") as text_file:
-            #     out[str(count)] = translation['translatedText']
-            #     count+=1
 
             print(u'Translation: {}'.format(translation['translatedText']))
 
@@ -169,13 +154,14 @@ def listen_print_loop(responses):
                 break
 
             num_chars_printed = 0
-        
 
 
 def main():
     # See http://g.co/cloud/speech/docs/languages
     # for a list of supported languages.
-    language_code =  sys.argv[2]  # a BCP-47 language tag
+
+    #input language code
+    language_code =  sys.argv[2]  
 
     client = speech.SpeechClient()
     config = types.RecognitionConfig(
@@ -195,8 +181,6 @@ def main():
 
         # Now, put the transcription responses to use.
         listen_print_loop(responses)
-
-
 
 if __name__ == '__main__':
     main()

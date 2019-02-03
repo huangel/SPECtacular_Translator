@@ -16,8 +16,6 @@ def synthesize_text(text):
     client = texttospeech.TextToSpeechClient()
 
     input_text = texttospeech.types.SynthesisInput(text=text)
-    # Note: the voice can also be specified by name.
-    # Names of voices can be retrieved with client.list_voices().
     voice = texttospeech.types.VoiceSelectionParams(
         language_code=lang,
         ssml_gender=texttospeech.enums.SsmlVoiceGender.FEMALE)
@@ -62,8 +60,9 @@ def translate_to_brailles(text):
     ascii_string = 'abcdefghijklmnopqrstuvwxyz '
     braille_string = '⠈⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽ '
     transtab = str.maketrans(ascii_string, braille_string)
-
+    #convert to english
     translation = translate_client.translate(text, target_language='en')['translatedText']
+    #convert to braille
     return translation.lower().translate(transtab)
 
 db = firestore.Client()
@@ -76,43 +75,15 @@ def on_snapshot(query_snapshot, b, c):
         try:
             cur_indices.remove('lang')
             max_index = max(cur_indices)
-            # synthesize_text(doc.to_dict()[max_index])
-            translate_to_brailles(doc.to_dict()[max_index])
-            print(doc.to_dict()[max_index]) 
-
-            # query_ref.document(other_username).update({max_index: firestore.DELETE_FIELD})
+            #if output lang is braille
+            if sys.argv[4] = "braille":
+                a = translate_to_brailles(doc.to_dict()[max_index])
+                print(a)
+            else:
+                synthesize_text(doc.to_dict()[max_index])
         except:
             pass
 
-# def get_text(count = 0):
-    # print(firebase.get('/output', None))
-    # result = firebase.get('/output', None).keys()
-    # dic_keys = set()
-    # for key in result:
-    #     try:
-    #         dic_keys.add(int(key))
-    #     except:
-    #         pass
-    # min_key = min(dic_keys)
-    # result = firebase.get('/output', min_key)
-    # firebase.delete('/output', min_key)
-
-    # while True:
-    #     yield result
-    #     result = firebase.get('/output', None).keys()
-    #     dic_keys = set()
-    #     for key in result:
-    #         try:
-    #             dic_keys.add(int(key))
-    #         except:
-    #             pass
-    #     min_key = min(dic_keys)
-    #     result = firebase.get('/output', min_key)
-    #     firebase.delete('/output', min_key)
-
-
 if __name__ == '__main__':
     query_watch = query_ref.on_snapshot(on_snapshot)
-    a = translate_to_brailles('너 돼지')
-    print(a)
     input()
