@@ -15,7 +15,6 @@ def synthesize_text(text):
     client = texttospeech.TextToSpeechClient()
 
     input_text = texttospeech.types.SynthesisInput(text=text)
-
     # Note: the voice can also be specified by name.
     # Names of voices can be retrieved with client.list_voices().
     voice = texttospeech.types.VoiceSelectionParams(
@@ -53,19 +52,22 @@ def synthesize_text(text):
     p.terminate()
 
 db = firestore.Client()
-query_ref = db.collection(u'translation')
+query_ref = db.collection(u'translation').document(other_username)
 
 def on_snapshot(query_snapshot, b, c):
     for doc in query_snapshot:
-        if doc.id == other_username:
-            cur_indices = set(doc.to_dict().keys())
-            try:
-                cur_indices.remove('lang')
-                max_index = max(cur_indices)
-                synthesize_text(doc.to_dict()[max_index])
-                print(doc.to_dict()[max_index]) 
-            except:
-                pass
+        # if doc.id == other_username:
+        cur_indices = set(doc.to_dict().keys())
+        try:
+            cur_indices.remove('lang')
+            max_index = max(cur_indices)
+            print(doc.to_dict()[max_index])
+            synthesize_text(doc.to_dict()[max_index])
+            print(doc.to_dict()[max_index]) 
+
+            # query_ref.document(other_username).update({max_index: firestore.DELETE_FIELD})
+        except:
+            pass
 
 # def get_text(count = 0):
     # print(firebase.get('/output', None))
