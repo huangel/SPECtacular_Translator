@@ -1,0 +1,7 @@
+import firestore
+
+db = firestore.Client() query_ref = db.collection(u’users’).where(“user”, “==”, u’Ada’)
+
+def on_snapshot(query_snapshot):
+for doc in query_snapshot.documents:
+print(u’{} => {}’.format(doc.id, doc.to_dict()))

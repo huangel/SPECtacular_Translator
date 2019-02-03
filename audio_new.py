@@ -18,7 +18,7 @@ target = 'ko'
 out = {"lang": target}
 
 firebase = firebase.FirebaseApplication('https://translation-bf31b.firebaseio.com', None)
-
+result = firebase.patch('/output', {'lang': target})
 # Audio recording parameters
 RATE = 16000
 CHUNK = int(RATE / 10)  # 100ms
@@ -155,6 +155,7 @@ def listen_print_loop(responses):
             # Exit recognition if any of the transcribed phrases could be
             # one of our keywords.
             if re.search(r'\b(exit|quit)\b', transcript, re.I):
+                print(out)
                 with open('output.json', 'w') as fp:
                     json.dump(out, fp)
                 # text_file.write(str(out))

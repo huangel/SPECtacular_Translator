@@ -50,15 +50,30 @@ def synthesize_text(text):
     p.terminate()
 
 def get_text(count = 0):
-    result = firebase.get('/output', count)
+    print(firebase.get('/output', None))
+    result = firebase.get('/output', None).keys()
+    dic_keys = set()
+    for key in result:
+        try:
+            dic_keys.add(int(key))
+        except:
+            pass
+    min_key = min(dic_keys)
+    result = firebase.get('/output', min_key)
+    firebase.delete('/output', min_key)
 
-    for cur_count in range(100):
-        result = firebase.get('/output', cur_count)
-        if result != None:
-            yield result 
-        else:
-            break
-
+    while True:
+        yield result
+        result = firebase.get('/output', None).keys()
+        dic_keys = set()
+        for key in result:
+            try:
+                dic_keys.add(int(key))
+            except:
+                pass
+        min_key = min(dic_keys)
+        result = firebase.get('/output', min_key)
+        firebase.delete('/output', min_key)
 
 
     # while result != None:
