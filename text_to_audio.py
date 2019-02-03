@@ -2,6 +2,7 @@ import pyaudio
 import wave
 from firebase import firebase
 from google.cloud import firestore
+from google.cloud import translate
 import json
 import sys
 
@@ -51,6 +52,20 @@ def synthesize_text(text):
     # close PyAudio (5)
     p.terminate()
 
+translate_client = translate.Client()
+
+def translate_to_brailles(text):
+    """
+    input: a string of sentence 
+    output: a string of brailles pattern 
+    """
+    ascii_string = 'abcdefghijklmnopqrstuvwxyz '
+    braille_string = '⠈⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽ '
+    transtab = str.maketrans(ascii_string, braille_string)
+
+    translation = translate_client.translate(text, target_language='en')['translatedText']
+    return translation.lower().translate(transtab)
+
 db = firestore.Client()
 query_ref = db.collection(u'translation').document(other_username)
 
@@ -61,8 +76,8 @@ def on_snapshot(query_snapshot, b, c):
         try:
             cur_indices.remove('lang')
             max_index = max(cur_indices)
-            print(doc.to_dict()[max_index])
-            synthesize_text(doc.to_dict()[max_index])
+            # synthesize_text(doc.to_dict()[max_index])
+            translate_to_brailles(doc.to_dict()[max_index])
             print(doc.to_dict()[max_index]) 
 
             # query_ref.document(other_username).update({max_index: firestore.DELETE_FIELD})
@@ -98,4 +113,6 @@ def on_snapshot(query_snapshot, b, c):
 
 if __name__ == '__main__':
     query_watch = query_ref.on_snapshot(on_snapshot)
+    a = translate_to_brailles('너 돼지')
+    print(a)
     input()
