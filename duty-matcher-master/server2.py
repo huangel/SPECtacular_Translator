@@ -46,7 +46,7 @@ def run():
 @app.route('/get_results', methods=['GET'])
 @cross_origin()
 def get_results():
-    return jsonify({'results': "anything"})
+    return jsonify({'results': ""})
 if __name__ == "__main__":
     # app.config['my_username'] = 'angel'
     # app.config['my_language'] = sys.argv[2]
