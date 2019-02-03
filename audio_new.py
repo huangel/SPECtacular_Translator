@@ -10,11 +10,14 @@ from google.cloud.speech import types
 import pyaudio
 from six.moves import queue
 from google.cloud import translate
+from google.cloud import firestore
+
+db = firestore.Client()
 
 # Instantiates a client
 translate_client = translate.Client()
 
-target = 'ko'
+target = sys.argv[4]
 out = {"lang": target}
 
 firebase = firebase.FirebaseApplication('https://translation-bf31b.firebaseio.com', None)
@@ -141,9 +144,12 @@ def listen_print_loop(responses):
             # with open('output.json') as f:
             #     cur_dic = json.load(f)
 
-            result = firebase.patch('/output', {str(count):translation['translatedText']})
+            # result = firebase.patch('/output', {str(count):translation['translatedText']})
+            doc_ref = db.collection(u'translation').document(sys.argv[1]) #TODO
+            out[str(count)] = translation['translatedText']
+            doc_ref.set(out)
             count+=1
-            print(result)
+            print(out)
 
 
             # with open("output.json", "a") as text_file:
@@ -169,7 +175,7 @@ def listen_print_loop(responses):
 def main():
     # See http://g.co/cloud/speech/docs/languages
     # for a list of supported languages.
-    language_code = 'en-US'  # a BCP-47 language tag
+    language_code =  sys.argv[2]  # a BCP-47 language tag
 
     client = speech.SpeechClient()
     config = types.RecognitionConfig(
