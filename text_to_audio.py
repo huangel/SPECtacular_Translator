@@ -3,6 +3,8 @@ import wave
 from firebase import firebase
 import json
 
+firebase = firebase.FirebaseApplication('https://translation-bf31b.firebaseio.com', None)
+lang = firebase.get("/output","lang")
 
 def synthesize_text(text):
     """Synthesizes speech from the input string of text."""
@@ -14,7 +16,7 @@ def synthesize_text(text):
     # Note: the voice can also be specified by name.
     # Names of voices can be retrieved with client.list_voices().
     voice = texttospeech.types.VoiceSelectionParams(
-        language_code='en-US',
+        language_code=lang,
         ssml_gender=texttospeech.enums.SsmlVoiceGender.FEMALE)
 
     audio_config = texttospeech.types.AudioConfig(
@@ -48,8 +50,6 @@ def synthesize_text(text):
     p.terminate()
 
 def get_text(count = 0):
-    firebase = firebase.FirebaseApplication('https://translation-bf31b.firebaseio.com', None)
-
     result = firebase.get('/output', count)
 
     for cur_count in range(100):
