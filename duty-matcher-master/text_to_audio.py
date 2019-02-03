@@ -83,7 +83,10 @@ def on_snapshot(query_snapshot, b, c):
                 synthesize_text(doc.to_dict()[max_index])
         except:
             pass
-
-if __name__ == '__main__':
+            
+def main():
     query_watch = query_ref.on_snapshot(on_snapshot)
     input()
+
+if __name__ == '__main__':
+    main()
