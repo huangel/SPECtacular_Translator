@@ -1,5 +1,9 @@
 from firebase import firebase
+import json
+
 firebase = firebase.FirebaseApplication('https://translation-bf31b.firebaseio.com', None)
-# result = firebase.post('/users', 'jeanachoi', {'print': 'pretty'}, {'X_FANCY_HEADER': 'VERY FANCY'})
-# result = firebase.post('/users', 'jeanachoi')
+with open('output.json') as f:
+    output = json.load(f)
+
+result = firebase.patch('/output', output)
 print(result)
